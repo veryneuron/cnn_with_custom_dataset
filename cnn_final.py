@@ -11,8 +11,10 @@ if device == 'cuda':
 
 path_train = './train'
 path_test = './test'
+path_para = './parameters'
+path_model = './model'
 learning_rate = 0.001
-training_epoch = 15
+training_epoch = 3
 batch_size = 128
 
 time.perf_counter()
@@ -120,3 +122,6 @@ with torch.no_grad():
 
     print('Accuracy:', 100.0*result.item()/number)
 print('Elapsed time:', time.perf_counter())
+
+torch.save(model.state_dict(), path_para)
+torch.save(model, path_model)
