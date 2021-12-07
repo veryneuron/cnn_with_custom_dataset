@@ -4,6 +4,8 @@ import torchvision.datasets as dsets
 import torchvision.transforms as transforms
 import torch.nn as nn
 
+from cnn_model import CNN
+
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 torch.manual_seed(777)
 if device == 'cuda':
@@ -11,10 +13,9 @@ if device == 'cuda':
 
 path_train = './train'
 path_test = './test'
-path_para = './parameters'
 path_model = './model'
 learning_rate = 0.001
-training_epoch = 3
+training_epoch = 20
 batch_size = 128
 
 time.perf_counter()
@@ -31,51 +32,6 @@ train_data_loader = torch.utils.data.DataLoader(dataset=train_data, batch_size=b
                                                 shuffle=True, drop_last=True, num_workers=0)
 test_data_loader = torch.utils.data.DataLoader(dataset=test_data, batch_size=batch_size,
                                                shuffle=True, drop_last=True, num_workers=0)
-
-
-class CNN(nn.Module):
-    def __init__(self):
-        super(CNN, self).__init__()
-        self.keep_prob = 0.6
-        self.layer1 = nn.Sequential(
-            nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1, bias=False),
-            nn.BatchNorm2d(32),
-            nn.ReLU())
-        self.layer2 = nn.Sequential(
-            nn.Conv2d(32, 32, kernel_size=3, stride=1, padding=1, bias=False),
-            nn.BatchNorm2d(32),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2))
-        self.layer3 = nn.Sequential(
-            nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1, bias=False),
-            nn.BatchNorm2d(64),
-            nn.ReLU())
-        self.layer4 = nn.Sequential(
-            nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1, bias=False),
-            nn.BatchNorm2d(64),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2))
-        self.fc1 = nn.Linear(7 * 7 * 64, 128, bias=False)
-        nn.init.xavier_uniform_(self.fc1.weight)
-        self.layer5 = nn.Sequential(
-            self.fc1,
-            nn.BatchNorm1d(128),
-            nn.ReLU(),
-            nn.Dropout(p=1 - self.keep_prob))
-        self.fc2 = nn.Linear(128, 26, bias=True)
-        nn.init.xavier_uniform_(self.fc2.weight)
-
-    def forward(self, x):
-        out = self.layer1(x)
-        out = self.layer2(out)
-        out = self.layer3(out)
-        out = self.layer4(out)
-        out = out.view(out.size(0), -1)
-        out = self.layer5(out)
-        out = self.fc2(out)
-
-        return out
-
 
 model = CNN().to(device)
 criterion = nn.CrossEntropyLoss().to(device)
@@ -122,6 +78,5 @@ with torch.no_grad():
 
     print('Accuracy:', 100.0*result.item()/number)
 print('Elapsed time:', time.perf_counter())
-
-torch.save(model.state_dict(), path_para)
-torch.save(model, path_model)
+model.train()
+torch.save(model.state_dict(), path_model)
