@@ -15,7 +15,7 @@ path_test = './test'
 path_model = './model'
 batch_size = 128
 
-time.perf_counter()
+start = time.perf_counter()
 
 transform = transforms.Compose([transforms.ToTensor(),
                                 transforms.Grayscale(1),
@@ -23,6 +23,7 @@ transform = transforms.Compose([transforms.ToTensor(),
 test_data = dsets.ImageFolder(root=path_test, transform=transform)
 
 # change num_workers to 0 if windows
+
 test_data_loader = torch.utils.data.DataLoader(dataset=test_data, batch_size=batch_size,
                                                shuffle=True, drop_last=True, num_workers=0)
 model = CNN()
@@ -44,5 +45,5 @@ with torch.no_grad():
         result += correct_prediction.int().sum()
 
     print('Accuracy:', 100.0*result.item()/number)
-print('Elapsed time:', time.perf_counter())
+print('Elapsed time:', time.perf_counter() - start)
 model.train()
